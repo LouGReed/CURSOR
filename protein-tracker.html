@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protein Tracker</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #000;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #333;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            animation: neon-pulse 1.5s ease-in-out infinite;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #00ffff;
+        }
+
+        button {
+            background-color: #000;
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00ffff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .stats {
+            font-size: 18px;
+            margin-top: 20px;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+        }
+
+        h1 {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes neon-pulse {
+            0% {
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Daily Protein Tracker</h1>
+    
+    <div>
+        <input type="text" id="foodInput" placeholder="What did you eat?">
+        <input type="number" id="proteinInput" placeholder="Protein (g)">
+        <button onclick="addProtein()">Add Food</button>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="stats">
+        <p>Total Protein: <span id="totalProtein">0</span>g / 100g</p>
+    </div>
+
+    <script>
+        let totalProtein = 0;
+
+        function addProtein() {
+            const foodInput = document.getElementById('foodInput');
+            const proteinInput = document.getElementById('proteinInput');
+            const proteinAmount = Number(proteinInput.value);
+
+            if (proteinAmount > 0) {
+                totalProtein += proteinAmount;
+                updateProgress();
+                
+                // Clear inputs
+                foodInput.value = '';
+                proteinInput.value = '';
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const totalProteinDisplay = document.getElementById('totalProtein');
+            
+            // Calculate percentage (max 100%)
+            const percentage = Math.min((totalProtein / 100) * 100, 100);
+            
+            // Update progress bar and display
+            progressBar.style.width = percentage + '%';
+            totalProteinDisplay.textContent = totalProtein;
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protein Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .stats {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daily Protein Tracker</h1>
+    
+    <div>
+        <input type="text" id="foodInput" placeholder="What did you eat?">
+        <input type="number" id="proteinInput" placeholder="Protein (g)">
+        <button onclick="addProtein()">Add Food</button>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="stats">
+        <p>Total Protein: <span id="totalProtein">0</span>g / 100g</p>
+    </div>
+
+    <script>
+        let totalProtein = 0;
+
+        function addProtein() {
+            const foodInput = document.getElementById('foodInput');
+            const proteinInput = document.getElementById('proteinInput');
+            const proteinAmount = Number(proteinInput.value);
+
+            if (proteinAmount > 0) {
+                totalProtein += proteinAmount;
+                updateProgress();
+                
+                // Clear inputs
+                foodInput.value = '';
+                proteinInput.value = '';
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const totalProteinDisplay = document.getElementById('totalProtein');
+            
+            // Calculate percentage (max 100%)
+            const percentage = Math.min((totalProtein / 100) * 100, 100);
+            
+            // Update progress bar and display
+            progressBar.style.width = percentage + '%';
+            totalProteinDisplay.textContent = totalProtein;
+        }
+    </script>
+</body>
+</html>

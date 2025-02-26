@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROTEIN IN LOU</title>
+    <style>
+        :root {
+            --sage: #8A9A5B;
+            --mustard: #E3B448;
+            --bright-red: #FF4B3E;
+            --cream: #F4F1DE;
+            --dark: #2F2F2F;
+        }
+
+        body {
+            font-family: "Arial Black", Impact, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: var(--cream);
+            color: var(--dark);
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: var(--sage);
+            text-shadow: 4px 4px 0 var(--mustard);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #fff;
+            border: 4px solid var(--sage);
+            margin: 20px 0;
+            padding: 4px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--mustard),
+                var(--mustard) 20px,
+                var(--sage) 20px,
+                var(--sage) 40px
+            );
+            transition: width 0.3s ease-in-out;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+            font-family: "Arial Black", Impact, sans-serif;
+            background-color: #fff;
+            color: var(--dark);
+            border: 4px solid var(--sage);
+        }
+
+        button {
+            background-color: var(--mustard);
+            color: var(--dark);
+            border: 4px solid var(--sage);
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: var(--sage);
+            border-color: var(--mustard);
+            color: #fff;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            width: 100%;
+            position: relative;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 4px solid var(--sage);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .search-result {
+            padding: 10px;
+            cursor: pointer;
+            color: var(--dark);
+            border-bottom: 4px solid var(--sage);
+        }
+
+        .search-result:hover {
+            background: var(--mustard);
+        }
+
+        .food-list {
+            margin-top: 20px;
+            background: #fff;
+            border: 4px solid var(--sage);
+            padding: 20px;
+        }
+
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: var(--cream);
+            color: var(--dark);
+            border: 4px solid var(--sage);
+        }
+
+        .food-item-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .food-emoji {
+            font-size: 1.5em;
+            background: #fff;
+            padding: 5px;
+            border: 2px solid var(--sage);
+        }
+
+        .delete-btn {
+            background: var(--bright-red);
+            color: #fff;
+            border: 2px solid var(--dark);
+            font-size: 20px;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: var(--dark);
+            border-color: var(--bright-red);
+        }
+
+        .stats {
+            font-size: 24px;
+            margin-top: 20px;
+            background: var(--sage);
+            color: #fff;
+            padding: 10px;
+            border: 4px solid var(--mustard);
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--sage);
+            text-shadow: 2px 2px 0 var(--mustard);
+            font-size: 32px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 20px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+            border: 2px solid var(--sage);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--mustard);
+            border: 2px solid var(--sage);
+        }
+    </style>
+</head>
+<body>
+    <h1>PROTEIN IN LOU</h1>
+    
+    <div class="search-container">
+        <input 
+            type="text" 
+            id="foodSearch" 
+            placeholder="SEARCH USDA DATABASE..." 
+            autocomplete="off"
+        >
+        <div id="searchResults" class="search-results"></div>
+    </div>
+    
+    <div class="food-inputs">
+        <input type="text" id="foodInput" placeholder="FOOD NAME">
+        <input 
+            type="number" 
+            id="proteinInput" 
+            placeholder="PROTEIN (g)"
+            step="0.1"
+            min="0"
+        >
+        <input 
+            type="number" 
+            id="servingSize" 
+            placeholder="SERVINGS" 
+            value="1" 
+            min="0.25" 
+            step="0.25"
+        >
+        <button onclick="addProtein()">ADD FOOD</button>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="stats">
+        <p>TOTAL PROTEIN: <span id="totalProtein">0</span>g / 100g</p>
+    </div>
+
+    <div class="food-list">
+        <h2>TODAY'S PROTEIN</h2>
+        <div id="foodItems"></div>
+    </div>
+
+    <script>
+        let totalProtein = 0;
+        let foodList = [];
+        const API_KEY = 'Pd2Z3elBilpBUy5IlTaSRGpY6E6xWicauJIRjamA';
+        let searchTimeout;
+
+        async function searchFood(query) {
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+            
+            document.getElementById('searchResults').innerHTML = '<div class="loading">Searching...</div>';
+            
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(
+                        `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${API_KEY}&query=${query}&pageSize=5`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+                    const data = await response.json();
+                    displayResults(data.foods || []);
+                } catch (error) {
+                    console.error('Error fetching food data:', error);
+                    document.getElementById('searchResults').innerHTML = 
+                        '<div class="search-result">Error searching foods. Please try again.</div>';
+                }
+            }, 300);
+        }
+
+        function displayResults(foods) {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '';
+            
+            if (foods.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-result">No foods found</div>';
+                return;
+            }
+
+            foods.forEach(food => {
+                const div = document.createElement('div');
+                div.className = 'search-result';
+                div.textContent = food.description;
+                div.onclick = () => selectFood(food);
+                resultsDiv.appendChild(div);
+            });
+        }
+
+        function selectFood(food) {
+            const foodInput = document.getElementById('foodInput');
+            const proteinInput = document.getElementById('proteinInput');
+            const searchResults = document.getElementById('searchResults');
+            
+            foodInput.value = food.description;
+            
+            const proteinNutrient = food.foodNutrients.find(
+                n => n.nutrientId === 1003
+            );
+            const proteinPer100g = proteinNutrient ? proteinNutrient.value : 0;
+            proteinInput.value = proteinPer100g.toFixed(1);
+            
+            searchResults.innerHTML = '';
+            document.getElementById('foodSearch').value = '';
+        }
+
+        function getFoodEmoji(foodName) {
+            const foodEmojis = {
+                'chicken': '🍗',
+                'egg': '🥚',
+                'fish': '🐟',
+                'beef': '🥩',
+                'milk': '🥛',
+                'cheese': '🧀',
+                'yogurt': '🥛',
+                'protein': '💪',
+                'shake': '🥤',
+                'nuts': '🥜',
+                'beans': '🫘',
+                'tofu': '🧊',
+                'bread': '🍞',
+                'rice': '🍚',
+                'vegetable': '🥬',
+                'fruit': '🍎',
+            };
+
+            const foodLower = foodName.toLowerCase();
+            for (const [key, emoji] of Object.entries(foodEmojis)) {
+                if (foodLower.includes(key)) {
+                    return emoji;
+                }
+            }
+            return '🍽️';
+        }
+
+        function addProtein() {
+            const foodInput = document.getElementById('foodInput');
+            const proteinInput = document.getElementById('proteinInput');
+            const servingSize = document.getElementById('servingSize');
+            const proteinAmount = Number(proteinInput.value) * Number(servingSize.value);
+
+            if (proteinAmount > 0) {
+                const foodItem = {
+                    name: foodInput.value,
+                    protein: proteinAmount,
+                    servings: Number(servingSize.value),
+                    id: Date.now()
+                };
+
+                foodList.push(foodItem);
+                totalProtein += proteinAmount;
+                updateProgress();
+                updateFoodList();
+                
+                foodInput.value = '';
+                proteinInput.value = '';
+                servingSize.value = '1';
+            }
+        }
+
+        function updateFoodList() {
+            const foodItems = document.getElementById('foodItems');
+            foodItems.innerHTML = '';
+
+            foodList.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'food-item';
+                div.innerHTML = `
+                    <div class="food-item-content">
+                        <span class="food-emoji">${getFoodEmoji(item.name)}</span>
+                        <span>${item.name} (${item.servings} serving${item.servings !== 1 ? 's' : ''}) - ${item.protein.toFixed(1)}g protein</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteFood(${item.id})">×</button>
+                `;
+                foodItems.appendChild(div);
+            });
+        }
+
+        function deleteFood(id) {
+            const foodItem = foodList.find(item => item.id === id);
+            if (foodItem) {
+                totalProtein -= foodItem.protein;
+                foodList = foodList.filter(item => item.id !== id);
+                updateProgress();
+                updateFoodList();
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const totalProteinDisplay = document.getElementById('totalProtein');
+            
+            const percentage = Math.min((totalProtein / 100) * 100, 100);
+            
+            progressBar.style.width = percentage + '%';
+            totalProteinDisplay.textContent = totalProtein.toFixed(1);
+        }
+
+        document.getElementById('foodSearch').addEventListener('input', (e) => {
+            searchFood(e.target.value);
+        });
+    </script>
+</body>
+</html> 

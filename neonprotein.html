@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Protein</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Add these new styles */
+        .food-list {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .food-item:last-child {
+            border-bottom: none;
+        }
+
+        .food-item-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .food-emoji {
+            font-size: 1.2em;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 0 10px;
+            text-shadow: 0 0 5px rgba(255, 68, 68, 0.5);
+        }
+
+        .delete-btn:hover {
+            color: #ff6666;
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+            background: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Neon Protein</h1>
+        <p>Track your protein intake</p>
+
+        <div class="stats">
+            <p>Total Protein: <span id="totalProtein">0</span>g / 100g</p>
+        </div>
+
+        <div class="food-list" id="foodList">
+            <h2 style="color: #00ffff; margin-top: 0;">Today's Foods</h2>
+            <div id="foodItems"></div>
+        </div>
+
+        <form id="proteinForm">
+            <input type="text" id="foodInput" placeholder="Food">
+            <input type="number" id="proteinInput" placeholder="Protein (g)">
+            <input type="number" id="servingSize" placeholder="Serving Size">
+            <button type="button" onclick="addProtein()">Add</button>
+        </form>
+    </div>
+
+    <script>
+        let foodList = [];
+        let totalProtein = 0;
+
+        function getFoodEmoji(foodName) {
+            const foodEmojis = {
+                'chicken': '🍗',
+                'egg': '🥚',
+                'fish': '🐟',
+                'beef': '🥩',
+                'milk': '🥛',
+                'cheese': '🧀',
+                'yogurt': '🥛',
+                'protein': '💪',
+                'shake': '🥤',
+                'nuts': '🥜',
+                'beans': '🫘',
+                'tofu': '🧊',
+                'bread': '🍞',
+                'rice': '🍚',
+                'vegetable': '🥬',
+                'fruit': '🍎',
+            };
+
+            const foodLower = foodName.toLowerCase();
+            for (const [key, emoji] of Object.entries(foodEmojis)) {
+                if (foodLower.includes(key)) {
+                    return emoji;
+                }
+            }
+            return '🍽️'; // Default emoji
+        }
+
+        function addProtein() {
+            const foodInput = document.getElementById('foodInput');
+            const proteinInput = document.getElementById('proteinInput');
+            const servingSize = document.getElementById('servingSize');
+            const proteinAmount = Number(proteinInput.value) * Number(servingSize.value);
+
+            if (proteinAmount > 0) {
+                const foodItem = {
+                    name: foodInput.value,
+                    protein: proteinAmount,
+                    servings: Number(servingSize.value),
+                    id: Date.now() // Unique ID for deletion
+                };
+
+                foodList.push(foodItem);
+                totalProtein += proteinAmount;
+                updateProgress();
+                updateFoodList();
+                
+                // Clear inputs
+                foodInput.value = '';
+                proteinInput.value = '';
+                servingSize.value = '1';
+            }
+        }
+
+        function updateFoodList() {
+            const foodItems = document.getElementById('foodItems');
+            foodItems.innerHTML = '';
+
+            foodList.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'food-item';
+                div.innerHTML = `
+                    <div class="food-item-content">
+                        <span class="food-emoji">${getFoodEmoji(item.name)}</span>
+                        <span>${item.name} (${item.servings} serving${item.servings !== 1 ? 's' : ''}) - ${item.protein.toFixed(1)}g protein</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteFood(${item.id})">×</button>
+                `;
+                foodItems.appendChild(div);
+            });
+        }
+
+        function deleteFood(id) {
+            const foodItem = foodList.find(item => item.id === id);
+            if (foodItem) {
+                totalProtein -= foodItem.protein;
+                foodList = foodList.filter(item => item.id !== id);
+                updateProgress();
+                updateFoodList();
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = (totalProtein / 100) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            document.getElementById('progressPercentage').textContent = `${progressPercentage.toFixed(2)}%`;
+        }
+    </script>
+</body>
+</html> 
